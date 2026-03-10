@@ -865,9 +865,30 @@ function loadSettingsToUI() {
 // ═══════════════════════════════════════
 
 jQuery(async () => {
-    // Добавляем HTML в панель расширений
-    const settingsContainer = $("#extensions_settings");
+    // Пробуем несколько контейнеров
+    const possibleContainers = [
+        "#extensions_settings",
+        "#extensions_settings2",
+        "#translation_container",
+    ];
+
+    let settingsContainer = null;
+    for (const selector of possibleContainers) {
+        const $el = $(selector);
+        if ($el.length > 0) {
+            settingsContainer = $el;
+            console.log(`[ChronoContext] Контейнер найден: ${selector}`);
+            break;
+        }
+    }
+
+    if (!settingsContainer) {
+        console.error("[ChronoContext] Не найден контейнер для настроек!");
+        return;
+    }
+
     settingsContainer.append(SETTINGS_HTML);
+
 
     // Инициализируем настройки расширения (мерж с дефолтами)
     if (!extension_settings[EXT_NAME]) {
