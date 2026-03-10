@@ -1,7 +1,6 @@
 /**
  * ChronoContext - SillyTavern Extension
  * Историческая контекстуализация RP
- * Автор: Haru & Bunny
  *
  * Ищет информацию о стране и годе в Wikipedia,
  * обрабатывает через AI, инжектит в контекст RP.
