@@ -1,20 +1,95 @@
 /* ═══════════════════════════════════════
- *  ChronoContext — Стили расширения
- *  Цветовая схема адаптирована под
- *  стандартную тему SillyTavern
+ *  ChronoContext — Premium UI Theme
+ *  Glassmorphism + Subtle Glow
+ *  Адаптировано под тёмные темы ST
  * ═══════════════════════════════════════ */
 
-/* ─── Контейнер ─── */
+/* ─── CSS-переменные расширения ─── */
 
 #chrono-context-settings {
+    --chrono-accent: #9b7dd4;
+    --chrono-accent-dim: rgba(155, 125, 212, 0.25);
+    --chrono-accent-glow: rgba(155, 125, 212, 0.4);
+    --chrono-danger: #e05555;
+    --chrono-danger-dim: rgba(224, 85, 85, 0.15);
+    --chrono-success: #5dba7d;
+    --chrono-surface: rgba(255, 255, 255, 0.03);
+    --chrono-surface-hover: rgba(255, 255, 255, 0.06);
+    --chrono-border: rgba(255, 255, 255, 0.07);
+    --chrono-border-accent: rgba(155, 125, 212, 0.3);
+    --chrono-text: var(--SmartThemeBodyColor, #d4d4d4);
+    --chrono-text-dim: rgba(200, 200, 200, 0.55);
+    --chrono-radius: 10px;
+    --chrono-radius-sm: 6px;
+    --chrono-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     font-size: 0.95em;
 }
 
+/* ─── Контейнер drawer ─── */
+
+#chrono-context-settings .inline-drawer {
+    border: 1px solid var(--chrono-border);
+    border-radius: var(--chrono-radius);
+    background: var(--chrono-surface);
+    backdrop-filter: blur(12px);
+    overflow: hidden;
+    transition: border-color var(--chrono-transition);
+}
+
+#chrono-context-settings .inline-drawer:hover {
+    border-color: var(--chrono-border-accent);
+}
+
+/* ─── Заголовок drawer ─── */
+
+#chrono-context-settings .inline-drawer-toggle {
+    padding: 12px 14px;
+    background: linear-gradient(
+        135deg,
+        rgba(155, 125, 212, 0.08) 0%,
+        rgba(100, 80, 160, 0.04) 50%,
+        rgba(155, 125, 212, 0.06) 100%
+    );
+    border-bottom: 1px solid var(--chrono-border);
+    transition: background var(--chrono-transition);
+    user-select: none;
+}
+
+#chrono-context-settings .inline-drawer-toggle:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(155, 125, 212, 0.14) 0%,
+        rgba(100, 80, 160, 0.08) 50%,
+        rgba(155, 125, 212, 0.10) 100%
+    );
+}
+
+#chrono-context-settings .inline-drawer-toggle b {
+    font-size: 1.02em;
+    letter-spacing: 0.04em;
+    background: linear-gradient(90deg, var(--chrono-accent), #c9a0dc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+#chrono-context-settings .inline-drawer-icon {
+    color: var(--chrono-accent);
+    opacity: 0.7;
+    transition: transform 0.3s ease, opacity var(--chrono-transition);
+}
+
+#chrono-context-settings .inline-drawer-toggle:hover .inline-drawer-icon {
+    opacity: 1;
+}
+
+/* ─── Контент drawer ─── */
+
 #chrono-context-settings .inline-drawer-content {
-    padding: 8px 4px;
+    padding: 12px 14px 16px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 /* ─── Строки ─── */
@@ -22,67 +97,224 @@
 .chrono-row {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
 }
 
 .chrono-row > label:not(.checkbox_label) {
-    font-size: 0.88em;
-    color: var(--SmartThemeQuoteColor, #b0b0b0);
-    margin-bottom: 2px;
+    font-size: 0.86em;
+    color: var(--chrono-text-dim);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-weight: 600;
 }
 
-/* ─── Управление годом: слайдер + числовое поле ─── */
+/* ─── Горизонтальные разделители ─── */
+
+#chrono-context-settings .sysHR {
+    border: none;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--chrono-border-accent) 50%,
+        transparent 100%
+    );
+    margin: 6px 0;
+}
+
+/* ─── Чекбокс главного переключателя ─── */
+
+#chrono-context-settings .chrono-row:first-child .checkbox_label {
+    padding: 8px 12px;
+    border-radius: var(--chrono-radius-sm);
+    background: var(--chrono-surface);
+    border: 1px solid var(--chrono-border);
+    transition: all var(--chrono-transition);
+    cursor: pointer;
+}
+
+#chrono-context-settings .chrono-row:first-child .checkbox_label:hover {
+    background: var(--chrono-surface-hover);
+    border-color: var(--chrono-border-accent);
+}
+
+#chrono-context-settings .chrono-row:first-child .checkbox_label:has(input:checked) {
+    background: var(--chrono-accent-dim);
+    border-color: var(--chrono-accent);
+    box-shadow: 0 0 12px var(--chrono-accent-glow);
+}
+
+#chrono-context-settings .chrono-row:first-child .checkbox_label span {
+    font-weight: 600;
+    font-size: 0.94em;
+    letter-spacing: 0.01em;
+}
+
+/* ─── Select (страна, язык) ─── */
+
+#chrono-context-settings select.text_pole {
+    padding: 7px 10px;
+    border-radius: var(--chrono-radius-sm);
+    border: 1px solid var(--chrono-border);
+    background: var(--chrono-surface);
+    color: var(--chrono-text);
+    cursor: pointer;
+    transition: all var(--chrono-transition);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239b7dd4' opacity='0.6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+}
+
+#chrono-context-settings select.text_pole:hover {
+    border-color: var(--chrono-border-accent);
+}
+
+#chrono-context-settings select.text_pole:focus {
+    border-color: var(--chrono-accent);
+    box-shadow: 0 0 0 2px var(--chrono-accent-dim);
+    outline: none;
+}
+
+/* ─── Input text ─── */
+
+#chrono-context-settings input.text_pole[type="text"] {
+    padding: 7px 10px;
+    border-radius: var(--chrono-radius-sm);
+    border: 1px solid var(--chrono-border);
+    background: var(--chrono-surface);
+    color: var(--chrono-text);
+    transition: all var(--chrono-transition);
+}
+
+#chrono-context-settings input.text_pole[type="text"]:focus {
+    border-color: var(--chrono-accent);
+    box-shadow: 0 0 0 2px var(--chrono-accent-dim);
+    outline: none;
+}
+
+/* ─── Управление годом ─── */
 
 .chrono-year-control {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .chrono-year-control input[type="range"] {
     flex: 1;
     cursor: pointer;
-    accent-color: var(--SmartThemeFavColor, #8a6bbf);
+    height: 4px;
+    border-radius: 2px;
+    accent-color: var(--chrono-accent);
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(
+        90deg,
+        var(--chrono-accent-dim),
+        var(--chrono-accent)
+    );
+    outline: none;
+}
+
+.chrono-year-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--chrono-accent);
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 8px var(--chrono-accent-glow);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.chrono-year-control input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 14px var(--chrono-accent-glow);
+}
+
+.chrono-year-control input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--chrono-accent);
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 8px var(--chrono-accent-glow);
+    cursor: pointer;
 }
 
 .chrono-year-control input[type="number"] {
-    width: 80px;
+    width: 78px;
     flex-shrink: 0;
     text-align: center;
-    font-weight: 600;
-    font-size: 1.05em;
+    font-weight: 700;
+    font-size: 1.1em;
+    font-variant-numeric: tabular-nums;
+    color: var(--chrono-accent);
+    border: 1px solid var(--chrono-border-accent);
+    border-radius: var(--chrono-radius-sm);
+    background: var(--chrono-surface);
+    padding: 5px 4px;
+    transition: all var(--chrono-transition);
 }
 
-/* ─── Сетка модулей (2 колонки) ─── */
+.chrono-year-control input[type="number"]:focus {
+    border-color: var(--chrono-accent);
+    box-shadow: 0 0 0 2px var(--chrono-accent-dim);
+    outline: none;
+}
+
+/* ─── Сетка модулей ─── */
 
 .chrono-modules-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 6px 12px;
+    gap: 5px 8px;
     padding: 4px 0;
 }
 
 .chrono-modules-grid .checkbox_label {
-    font-size: 0.88em;
+    font-size: 0.86em;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     cursor: pointer;
-    padding: 3px 0;
-    transition: opacity 0.15s ease;
+    padding: 5px 8px;
+    border-radius: var(--chrono-radius-sm);
+    border: 1px solid transparent;
+    transition: all var(--chrono-transition);
+    position: relative;
 }
 
 .chrono-modules-grid .checkbox_label:hover {
-    opacity: 0.8;
+    background: var(--chrono-surface-hover);
+    border-color: var(--chrono-border);
+}
+
+.chrono-modules-grid .checkbox_label:has(input:checked) {
+    background: var(--chrono-accent-dim);
+    border-color: rgba(155, 125, 212, 0.2);
+}
+
+.chrono-modules-grid .checkbox_label:has(input:checked):hover {
+    border-color: rgba(155, 125, 212, 0.35);
 }
 
 .chrono-modules-grid .checkbox_label span {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.3;
 }
 
-/* ─── Кнопки действий ─── */
+.chrono-modules-grid .checkbox_label input[type="checkbox"] {
+    accent-color: var(--chrono-accent);
+    flex-shrink: 0;
+}
+
+/* ─── Кнопки ─── */
 
 .chrono-buttons {
     display: flex;
@@ -93,85 +325,155 @@
 
 .chrono-buttons .menu_button {
     flex: 1 1 auto;
-    min-width: 120px;
-    padding: 7px 12px;
-    font-size: 0.88em;
+    min-width: 110px;
+    padding: 9px 14px;
+    font-size: 0.86em;
+    font-weight: 500;
     text-align: center;
-    border-radius: 6px;
-    transition: all 0.2s ease;
+    border-radius: var(--chrono-radius-sm);
     cursor: pointer;
+    transition: all var(--chrono-transition);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.01em;
 }
 
 .chrono-buttons .menu_button:disabled {
-    opacity: 0.4;
+    opacity: 0.35;
     cursor: not-allowed;
+    filter: grayscale(0.5);
 }
 
-/* Кнопка генерации — акцентный цвет */
+/* Кнопка генерации */
+
 #chrono_generate_btn {
-    background: var(--SmartThemeFavColor, #8a6bbf);
+    background: linear-gradient(135deg, var(--chrono-accent), #7b5cb8);
     color: #fff;
     border: none;
-    font-weight: 600;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow:
+        0 2px 8px rgba(155, 125, 212, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+#chrono_generate_btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.12),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+#chrono_generate_btn:hover:not(:disabled)::before {
+    left: 100%;
 }
 
 #chrono_generate_btn:hover:not(:disabled) {
-    filter: brightness(1.15);
+    box-shadow:
+        0 4px 16px rgba(155, 125, 212, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
 }
 
 #chrono_generate_btn:active:not(:disabled) {
-    filter: brightness(0.9);
-    transform: scale(0.98);
+    transform: translateY(0px) scale(0.98);
+    box-shadow: 0 1px 4px rgba(155, 125, 212, 0.2);
 }
 
-/* Кнопка очистки — красноватый тон */
+/* Кнопка превью */
+
+#chrono_preview_btn {
+    border: 1px solid var(--chrono-border);
+    background: var(--chrono-surface);
+    color: var(--chrono-text);
+}
+
+#chrono_preview_btn:hover:not(:disabled) {
+    background: var(--chrono-surface-hover);
+    border-color: var(--chrono-border-accent);
+}
+
+/* Кнопка очистки */
+
 #chrono_clear_btn {
-    border-color: #c0392b;
-    color: #e74c3c;
+    border: 1px solid rgba(224, 85, 85, 0.25);
+    background: var(--chrono-danger-dim);
+    color: var(--chrono-danger);
 }
 
 #chrono_clear_btn:hover {
-    background: rgba(231, 76, 60, 0.12);
+    background: rgba(224, 85, 85, 0.2);
+    border-color: rgba(224, 85, 85, 0.4);
+    box-shadow: 0 0 10px rgba(224, 85, 85, 0.15);
 }
 
 /* ─── Статус ─── */
 
 .chrono-status {
-    font-size: 0.84em;
-    color: var(--SmartThemeQuoteColor, #a0a0a0);
-    padding: 6px 8px;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.03);
-    border-left: 3px solid var(--SmartThemeFavColor, #8a6bbf);
-    transition: color 0.3s ease;
+    font-size: 0.82em;
+    color: var(--chrono-text-dim);
+    padding: 8px 12px;
+    border-radius: var(--chrono-radius-sm);
+    background: var(--chrono-surface);
+    border-left: 3px solid var(--chrono-accent);
+    transition: all 0.3s ease;
     min-height: 1.4em;
     word-break: break-word;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    letter-spacing: 0.01em;
+    line-height: 1.5;
 }
 
-/* ─── Превью пакета ─── */
+.chrono-status-loading {
+    animation: chrono-pulse 1.4s ease-in-out infinite;
+    border-left-color: var(--chrono-success);
+}
+
+/* ─── Превью ─── */
 
 #chrono_preview_area {
-    animation: chrono-fadein 0.25s ease;
+    animation: chrono-slidein 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #chrono_preview_text {
-    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-    font-size: 0.82em;
-    line-height: 1.5;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+    font-size: 0.8em;
+    line-height: 1.6;
     resize: vertical;
-    min-height: 180px;
-    max-height: 500px;
-    border-radius: 6px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: var(--SmartThemeBodyColor, #ccc);
-    transition: opacity 0.2s ease, border-color 0.2s ease;
+    min-height: 200px;
+    max-height: 550px;
+    border-radius: var(--chrono-radius-sm);
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--chrono-border);
+    color: var(--chrono-text);
+    transition: all var(--chrono-transition);
+    tab-size: 4;
+}
+
+#chrono_preview_text:hover {
+    border-color: var(--chrono-border-accent);
 }
 
 #chrono_preview_text:not([readonly]) {
-    border-color: var(--SmartThemeFavColor, #8a6bbf);
-    background: rgba(0, 0, 0, 0.25);
+    border-color: var(--chrono-accent);
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow:
+        0 0 0 2px var(--chrono-accent-dim),
+        inset 0 0 20px rgba(155, 125, 212, 0.03);
+}
+
+#chrono_preview_text:focus {
+    outline: none;
 }
 
 #chrono_preview_area .chrono-row {
@@ -181,54 +483,86 @@
 
 #chrono_edit_btn,
 #chrono_save_edit_btn {
-    font-size: 0.84em;
-    padding: 5px 10px;
+    font-size: 0.82em;
+    padding: 6px 12px;
+    border-radius: var(--chrono-radius-sm);
+    cursor: pointer;
+    transition: all var(--chrono-transition);
+}
+
+#chrono_edit_btn {
+    border: 1px solid var(--chrono-border);
+    background: var(--chrono-surface);
+    color: var(--chrono-text);
+}
+
+#chrono_edit_btn:hover {
+    background: var(--chrono-surface-hover);
+    border-color: var(--chrono-border-accent);
 }
 
 #chrono_save_edit_btn {
-    background: var(--SmartThemeFavColor, #8a6bbf);
+    background: linear-gradient(135deg, var(--chrono-success), #4a9e68);
     color: #fff;
     border: none;
     font-weight: 600;
+    box-shadow: 0 2px 8px rgba(93, 186, 125, 0.25);
 }
 
-/* ─── Горизонтальные разделители ─── */
-
-#chrono-context-settings .sysHR {
-    border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    margin: 4px 0;
+#chrono_save_edit_btn:hover {
+    box-shadow: 0 4px 14px rgba(93, 186, 125, 0.35);
+    transform: translateY(-1px);
 }
 
-/* ─── Заголовок drawer ─── */
+/* ─── Скроллбар ─── */
 
-#chrono-context-settings .inline-drawer-toggle b {
-    font-size: 1em;
-    letter-spacing: 0.02em;
+#chrono_preview_text::-webkit-scrollbar {
+    width: 5px;
+}
+
+#chrono_preview_text::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+}
+
+#chrono_preview_text::-webkit-scrollbar-thumb {
+    background: var(--chrono-accent-dim);
+    border-radius: 3px;
+    transition: background 0.2s;
+}
+
+#chrono_preview_text::-webkit-scrollbar-thumb:hover {
+    background: var(--chrono-accent-glow);
 }
 
 /* ─── Анимации ─── */
 
-@keyframes chrono-fadein {
+@keyframes chrono-pulse {
+    0%, 100% { opacity: 1; border-left-color: var(--chrono-accent); }
+    50% { opacity: 0.6; border-left-color: var(--chrono-success); }
+}
+
+@keyframes chrono-slidein {
     from {
         opacity: 0;
-        transform: translateY(-6px);
+        transform: translateY(-8px);
+        max-height: 0;
     }
     to {
         opacity: 1;
         transform: translateY(0);
+        max-height: 1000px;
     }
 }
 
-/* ─── Пульсация статуса при загрузке ─── */
-
-.chrono-status-loading {
-    animation: chrono-pulse 1.2s ease-in-out infinite;
+/* Плавное появление всего расширения */
+#chrono-context-settings {
+    animation: chrono-fadein 0.4s ease;
 }
 
-@keyframes chrono-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+@keyframes chrono-fadein {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 /* ─── Адаптивность ─── */
@@ -254,38 +588,64 @@
     .chrono-year-control input[type="number"] {
         width: 100%;
     }
+
+    #chrono-context-settings .inline-drawer-content {
+        padding: 10px 10px 14px;
+    }
 }
 
-/* ─── Скроллбар превью (тонкий, в стиле ST) ─── */
+/* ─── Тултипы для кнопок ─── */
 
-#chrono_preview_text::-webkit-scrollbar {
-    width: 6px;
-}
-
-#chrono_preview_text::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-#chrono_preview_text::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 3px;
-}
-
-#chrono_preview_text::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.22);
-}
-
-/* ─── Select стилизация (для dropdown страны/языка) ─── */
-
-#chrono-context-settings select.text_pole {
-    padding: 5px 8px;
+.chrono-buttons .menu_button[disabled]::after {
+    content: "Сначала сгенерируйте пакет";
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    background: rgba(30, 30, 30, 0.95);
+    color: var(--chrono-text-dim);
+    font-size: 0.75em;
+    padding: 4px 8px;
     border-radius: 4px;
-    cursor: pointer;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 10;
 }
 
-/* ─── Чекбокс включения: выделяем его чуть больше ─── */
+.chrono-buttons .menu_button[disabled]:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
 
-#chrono-context-settings .chrono-row:first-child .checkbox_label {
-    font-size: 0.95em;
-    font-weight: 500;
+/* ─── Акцентная полоска сверху drawer ─── */
+
+#chrono-context-settings .inline-drawer::before {
+    content: "";
+    display: block;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--chrono-accent) 30%,
+        #c9a0dc 50%,
+        var(--chrono-accent) 70%,
+        transparent 100%
+    );
+    opacity: 0.6;
+}
+
+/* ─── Иконка состояния при активной инжекции ─── */
+
+#chrono_enabled:checked ~ span::after {
+    content: " ●";
+    color: var(--chrono-success);
+    font-size: 0.7em;
+    animation: chrono-dot-pulse 2s ease-in-out infinite;
+}
+
+@keyframes chrono-dot-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
 }
