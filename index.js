@@ -1,23 +1,12 @@
 /**
  * ChronoContext - SillyTavern Extension
  * Историческая контекстуализация RP
- *
- * Ищет информацию о стране и годе в Wikipedia,
- * обрабатывает через AI, инжектит в контекст RP.
+ * Автор: Haru & Bunny
  */
 
 // =============================================
-//  ИМПОРТЫ - ТОЛЬКО ГАРАНТИРОВАННЫЕ ЭКСПОРТЫ
+//  ИМПОРТЫ
 // =============================================
-//
-//  НЕ импортируем напрямую:
-//    - setExtensionPrompt (получаем через getContext)
-//    - saveMetadataDebounced (не нужен)
-//    - generateQuietPrompt (получаем через window)
-//
-//  Эти три символа НЕ ЭКСПОРТИРУЮТСЯ стабильно
-//  во всех версиях ST и ломают загрузку модуля.
-//
 
 import {
     extension_settings,
@@ -35,84 +24,58 @@ import {
 //  БЕЗОПАСНЫЕ ОБЁРТКИ
 // =============================================
 
-/**
- * Безопасный вызов setExtensionPrompt.
- * Пробует: getContext() -> window -> динамический импорт.
- */
 function safeSetExtensionPrompt(name, value, position, depth) {
-    // Способ 1: через getContext()
     try {
-        const ctx = getContext();
+        var ctx = getContext();
         if (ctx && typeof ctx.setExtensionPrompt === "function") {
             ctx.setExtensionPrompt(name, value, position, depth);
             return true;
         }
-    } catch (e) {
-        // тихо
-    }
+    } catch (e) {}
 
-    // Способ 2: глобальная функция
     if (typeof window.SillyTavern !== "undefined") {
         try {
-            const fn = window.SillyTavern?.getContext?.()?.setExtensionPrompt;
+            var fn = window.SillyTavern.getContext().setExtensionPrompt;
             if (typeof fn === "function") {
                 fn(name, value, position, depth);
                 return true;
             }
-        } catch (e) {
-            // тихо
-        }
+        } catch (e) {}
     }
 
-    console.warn("[ChronoContext] setExtensionPrompt недоступен ни через один источник");
+    console.warn("[ChronoContext] setExtensionPrompt unavailable");
     return false;
 }
 
-/**
- * Безопасный вызов generateQuietPrompt.
- * Пробует: window -> getContext() -> динамический импорт.
- */
 async function safeGenerateQuietPrompt(prompt) {
-    // Способ 1: глобальная функция (ST часто кладёт её в window)
     if (typeof window.generateQuietPrompt === "function") {
         return await window.generateQuietPrompt(prompt, false);
     }
 
-    // Способ 2: через SillyTavern.getContext
     if (typeof window.SillyTavern !== "undefined") {
         try {
-            const ctx = window.SillyTavern.getContext();
+            var ctx = window.SillyTavern.getContext();
             if (ctx && typeof ctx.generateQuietPrompt === "function") {
                 return await ctx.generateQuietPrompt(prompt, false);
             }
-        } catch (e) {
-            // тихо
-        }
+        } catch (e) {}
     }
 
-    // Способ 3: через getContext из импорта
     try {
-        const ctx = getContext();
-        if (ctx && typeof ctx.generateQuietPrompt === "function") {
-            return await ctx.generateQuietPrompt(prompt, false);
+        var ctx2 = getContext();
+        if (ctx2 && typeof ctx2.generateQuietPrompt === "function") {
+            return await ctx2.generateQuietPrompt(prompt, false);
         }
-    } catch (e) {
-        // тихо
-    }
+    } catch (e) {}
 
-    // Способ 4: динамический импорт
     try {
-        const mod = await import("../../../../script.js");
+        var mod = await import("../../../../script.js");
         if (typeof mod.generateQuietPrompt === "function") {
             return await mod.generateQuietPrompt(prompt, false);
         }
-    } catch (e) {
-        // тихо
-    }
+    } catch (e) {}
 
-    throw new Error(
-        "generateQuietPrompt недоступен. Убедись, что SillyTavern версии 1.11+ и подключена модель AI."
-    );
+    throw new Error("generateQuietPrompt unavailable. Update SillyTavern to 1.11+.");
 }
 
 
@@ -120,17 +83,16 @@ async function safeGenerateQuietPrompt(prompt) {
 //  КОНСТАНТЫ
 // =============================================
 
-const EXT_NAME = "chrono-context";
+var EXT_NAME = "chrono-context";
 
-const INJECTION_POSITION = {
+var INJECTION_POSITION = {
     AFTER_SYSTEM: 1,
     IN_CHAT: 2,
 };
 
-const WIKI_API_BASE = "https://en.wikipedia.org/w/api.php";
-const WIKI_REST_BASE = "https://en.wikipedia.org/api/rest_v1";
+var WIKI_API_BASE = "https://en.wikipedia.org/w/api.php";
 
-const COUNTRY_PRESETS = {
+var COUNTRY_PRESETS = {
     russia:      { label: "Россия",         wiki_name: "Russia" },
     ussr:        { label: "СССР",           wiki_name: "Soviet Union" },
     usa:         { label: "США",            wiki_name: "United States" },
@@ -152,7 +114,7 @@ const COUNTRY_PRESETS = {
     ukraine:     { label: "Украина",        wiki_name: "Ukraine" },
 };
 
-const DEFAULT_SETTINGS = {
+var DEFAULT_SETTINGS = {
     enabled: false,
     country_key: "russia",
     custom_country: "",
@@ -176,12 +138,12 @@ const DEFAULT_SETTINGS = {
 
 
 // =============================================
-//  HTML ШАБЛОН
+//  HTML
 // =============================================
 
 function buildSettingsHTML() {
-    const countryOptions = Object.entries(COUNTRY_PRESETS)
-        .map(([key, val]) => '<option value="' + key + '">' + val.label + '</option>')
+    var countryOptions = Object.entries(COUNTRY_PRESETS)
+        .map(function(pair) { return '<option value="' + pair[0] + '">' + pair[1].label + '</option>'; })
         .join("");
 
     return '<div id="chrono-context-settings">'
@@ -192,7 +154,6 @@ function buildSettingsHTML() {
         + '</div>'
         + '<div class="inline-drawer-content">'
 
-        // Вкл/Выкл
         + '<div class="chrono-row">'
         + '<label class="checkbox_label" for="chrono_enabled">'
         + '<input type="checkbox" id="chrono_enabled" />'
@@ -202,7 +163,6 @@ function buildSettingsHTML() {
 
         + '<hr class="sysHR" />'
 
-        // Страна
         + '<div class="chrono-row">'
         + '<label for="chrono_country">Страна:</label>'
         + '<select id="chrono_country" class="text_pole">'
@@ -211,13 +171,11 @@ function buildSettingsHTML() {
         + '</select>'
         + '</div>'
 
-        // Кастомная страна
         + '<div class="chrono-row" id="chrono_custom_country_row" style="display:none;">'
         + '<label for="chrono_custom_country">Название страны (англ.):</label>'
         + '<input type="text" id="chrono_custom_country" class="text_pole" placeholder="например: Ottoman Empire" />'
         + '</div>'
 
-        // Год
         + '<div class="chrono-row">'
         + '<label for="chrono_year">Год:</label>'
         + '<div class="chrono-year-control">'
@@ -226,7 +184,6 @@ function buildSettingsHTML() {
         + '</div>'
         + '</div>'
 
-        // Язык
         + '<div class="chrono-row">'
         + '<label for="chrono_language">Язык пакета:</label>'
         + '<select id="chrono_language" class="text_pole">'
@@ -243,7 +200,6 @@ function buildSettingsHTML() {
 
         + '<hr class="sysHR" />'
 
-        // Модули
         + '<div class="chrono-row"><b>Модули:</b></div>'
         + '<div class="chrono-modules-grid">'
         + '<label class="checkbox_label"><input type="checkbox" id="chrono_mod_technology" checked /><span>Технологии и быт</span></label>'
@@ -258,19 +214,16 @@ function buildSettingsHTML() {
 
         + '<hr class="sysHR" />'
 
-        // Кнопки
         + '<div class="chrono-row chrono-buttons">'
         + '<button id="chrono_generate_btn" class="menu_button">Найти и сгенерировать пакет</button>'
         + '<button id="chrono_preview_btn" class="menu_button" disabled>Превью пакета</button>'
         + '<button id="chrono_clear_btn" class="menu_button">Очистить кэш</button>'
         + '</div>'
 
-        // Статус
         + '<div class="chrono-row">'
         + '<div id="chrono_status" class="chrono-status">Статус: не активен</div>'
         + '</div>'
 
-        // Превью
         + '<div id="chrono_preview_area" style="display:none;">'
         + '<hr class="sysHR" />'
         + '<div class="chrono-row"><b>Текущий пакет:</b></div>'
@@ -321,19 +274,15 @@ function getCountryDisplayName() {
 async function wikiSearch(query, limit) {
     limit = limit || 5;
     var params = new URLSearchParams({
-        action: "query",
-        list: "search",
-        srsearch: query,
-        srlimit: String(limit),
-        format: "json",
-        origin: "*",
+        action: "query", list: "search",
+        srsearch: query, srlimit: String(limit),
+        format: "json", origin: "*",
     });
-
     try {
         var resp = await fetch(WIKI_API_BASE + "?" + params);
         if (!resp.ok) throw new Error("HTTP " + resp.status);
         var data = await resp.json();
-        return (data.query && data.query.search || []).map(function(item) { return item.title; });
+        return (data.query && data.query.search || []).map(function(i) { return i.title; });
     } catch (err) {
         console.error("[ChronoContext] Wiki search error:", err.message);
         return [];
@@ -343,37 +292,26 @@ async function wikiSearch(query, limit) {
 async function wikiGetArticleText(title, maxChars) {
     maxChars = maxChars || 6000;
     var params = new URLSearchParams({
-        action: "query",
-        titles: title,
-        prop: "extracts",
-        explaintext: "true",
-        exintro: "false",
-        format: "json",
-        origin: "*",
+        action: "query", titles: title,
+        prop: "extracts", explaintext: "true",
+        exintro: "false", format: "json", origin: "*",
     });
-
     try {
         var resp = await fetch(WIKI_API_BASE + "?" + params);
         if (!resp.ok) throw new Error("HTTP " + resp.status);
         var data = await resp.json();
         var pages = (data.query && data.query.pages) || {};
-        var pageId = Object.keys(pages)[0];
-
-        if (pageId === "-1" || !pages[pageId] || !pages[pageId].extract) {
-            return null;
-        }
-
-        var text = pages[pageId].extract;
+        var pid = Object.keys(pages)[0];
+        if (pid === "-1" || !pages[pid] || !pages[pid].extract) return null;
+        var text = pages[pid].extract;
         if (text.length > maxChars) {
             text = text.substring(0, maxChars);
             var lp = text.lastIndexOf(".");
-            if (lp > maxChars * 0.7) {
-                text = text.substring(0, lp + 1);
-            }
+            if (lp > maxChars * 0.7) text = text.substring(0, lp + 1);
         }
         return text;
     } catch (err) {
-        console.error("[ChronoContext] Article fetch error for '" + title + "':", err.message);
+        console.error("[ChronoContext] Article error '" + title + "':", err.message);
         return null;
     }
 }
@@ -389,6 +327,10 @@ function buildSearchQueries(countryWikiName, year) {
         countryWikiName + " technology",
         "History of " + countryWikiName + " (" + decade + "s)",
         "Media of " + countryWikiName,
+        year + " in music",
+        year + " in film",
+        year + " in television",
+        year + " in video games",
     ];
 }
 
@@ -400,7 +342,6 @@ async function gatherWikipediaData(countryWikiName, year) {
 
     for (var i = 0; i < queries.length; i++) {
         var query = queries[i];
-
         var directText = await wikiGetArticleText(query, 5000);
         if (directText && directText.length > 200) {
             collected[query] = directText;
@@ -408,12 +349,10 @@ async function gatherWikipediaData(countryWikiName, year) {
             setStatus("Найдена статья: " + query);
             continue;
         }
-
         var results = await wikiSearch(query, 3);
         for (var j = 0; j < results.length; j++) {
             var title = results[j];
             if (processed[title]) continue;
-
             var text = await wikiGetArticleText(title, 4000);
             if (text && text.length > 200) {
                 collected[title] = text;
@@ -422,16 +361,14 @@ async function gatherWikipediaData(countryWikiName, year) {
                 break;
             }
         }
-
-        await new Promise(function(resolve) { setTimeout(resolve, 300); });
+        await new Promise(function(resolve) { setTimeout(resolve, 250); });
     }
-
     return collected;
 }
 
 
 // =============================================
-//  ГЕНЕРАЦИЯ ПАКЕТА
+//  ГЕНЕРАЦИЯ ПАКЕТА (ПЕРЕРАБОТАННЫЙ ПРОМПТ)
 // =============================================
 
 function buildProcessingPrompt(countryDisplay, countryWikiName, year, collectedTexts, modules, outputLang) {
@@ -441,12 +378,12 @@ function buildProcessingPrompt(countryDisplay, countryWikiName, year, collectedT
             rawDataBlock += "\n--- ARTICLE: " + title + " ---\n" + collectedTexts[title] + "\n";
         }
     }
-    if (rawDataBlock.length > 25000) {
-        rawDataBlock = rawDataBlock.substring(0, 25000) + "\n[...truncated]";
+    if (rawDataBlock.length > 30000) {
+        rawDataBlock = rawDataBlock.substring(0, 30000) + "\n[...truncated]";
     }
 
     var langMap = {
-        ru: "Ответ ПОЛНОСТЬЮ на русском языке.",
+        ru: "Весь ответ ПОЛНОСТЬЮ на русском языке.",
         en: "Respond ENTIRELY in English.",
         ja: "回答は全て日本語で。",
         zh: "请全部用中文回答。",
@@ -457,34 +394,97 @@ function buildProcessingPrompt(countryDisplay, countryWikiName, year, collectedT
     };
 
     var modInstr = [];
-    if (modules.technology)      modInstr.push("TECHNOLOGY & DAILY LIFE: What devices, vehicles, appliances exist? What internet/phones look like? What brands are popular? What does NOT exist yet?");
-    if (modules.culture)         modInstr.push("CULTURE & MEDIA: Popular movies, TV shows, music, books, video games of this specific year. Fashion trends. Social media platforms that exist (and which DON'T).");
-    if (modules.politics)        modInstr.push("POLITICAL BACKGROUND: Major political events, wars, elections, scandals. NOT a history lecture, but what ordinary people talk about.");
-    if (modules.economy)         modInstr.push("ECONOMY & PRICES: Average salary, cost of living, popular stores/restaurants, economic mood.");
-    if (modules.daily_life)      modInstr.push("EVERYDAY LIFE: How people commute, shop, eat, date, entertain themselves. Typical apartment/house.");
-    if (modules.slang)           modInstr.push("SLANG & SPEECH PATTERNS: Era-specific slang, popular expressions, catchphrases, internet slang of the time.");
-    if (modules.anachronisms)    modInstr.push("ANACHRONISM BLACKLIST: A strict list of things that DO NOT EXIST YET in this year. Format as bullet list.");
-    if (modules.news_background) modInstr.push("NEWS BACKGROUND: What specific events are in the news RIGHT NOW in this year?");
 
-    var modBlock = modInstr.map(function(m, i) { return (i + 1) + ". " + m; }).join("\n");
+    if (modules.technology) modInstr.push(
+        "TECHNOLOGY & DEVICES:\n"
+        + "  - List 15+ specific items across categories: phones, computers, OS versions, game consoles, internet speed/type, popular websites, apps, home appliances, cars, payment methods.\n"
+        + "  - Format: '- [Category]: [item1], [item2], [item3]' on ONE line per category.\n"
+        + "  - Include brand names, model numbers, version numbers where possible.\n"
+        + "  - State what internet looks like (dial-up? broadband? 3G? 4G?)."
+    );
 
-    return "You are a historical research assistant. You have been given raw Wikipedia data about "
-        + countryWikiName + " around the year " + year + ".\n\n"
-        + "Your task: Create a structured, concise CONTEXT PACKAGE for a roleplay set in "
-        + countryDisplay + " in " + year + ".\n\n"
-        + "This package will be injected into an AI's system prompt to ensure historically accurate roleplay. "
-        + "It must be practical and specific, not academic.\n\n"
-        + "RAW RESEARCH DATA:\n" + rawDataBlock + "\n\n"
-        + "REQUIRED SECTIONS:\n" + modBlock + "\n\n"
-        + "RULES:\n"
-        + "- Be SPECIFIC: name exact brands, exact prices, exact shows, exact devices.\n"
-        + "- Be CONCISE: use bullet points.\n"
-        + "- Focus on what a CHARACTER LIVING IN THIS TIME would experience day-to-day.\n"
-        + "- The ANACHRONISM BLACKLIST is critical.\n"
-        + "- If raw data is insufficient, use your general knowledge but stay historically accurate.\n"
+    if (modules.culture) modInstr.push(
+        "CULTURE & MEDIA (THIS IS THE BIGGEST SECTION):\n"
+        + "  - MOVIES: List 10+ specific titles released this year (both domestic and international hits).\n"
+        + "  - TV SHOWS / SERIES: List 10+ specific shows airing this year (domestic + foreign).\n"
+        + "  - MUSIC: List 10+ specific artists/bands AND their specific songs/albums popular this year.\n"
+        + "  - VIDEO GAMES: List 8+ specific game titles released or hugely popular this year.\n"
+        + "  - BOOKS: List 5+ popular books/authors.\n"
+        + "  - SOCIAL MEDIA: Which platforms exist and are popular? Which DON'T exist yet?\n"
+        + "  - FASHION: 5+ specific trends (clothing items, brands, hairstyles).\n"
+        + "  - MEMES & VIRAL: 3-5 specific memes, viral videos, internet phenomena of the year.\n"
+        + "  - Format each sub-category as a compact list. Names only, no plot summaries."
+    );
+
+    if (modules.politics) modInstr.push(
+        "POLITICAL BACKGROUND:\n"
+        + "  - List 8+ specific events, names, dates. Who is president/PM? What elections? What wars? What protests?\n"
+        + "  - Focus on what ordinary people TALK about, not textbook facts.\n"
+        + "  - One line per event. No essays."
+    );
+
+    if (modules.economy) modInstr.push(
+        "ECONOMY & PRICES:\n"
+        + "  - Average salary (national + capital city).\n"
+        + "  - Currency exchange rate to USD.\n"
+        + "  - List 15+ specific prices: bread, milk, gasoline, cigarettes, beer, coffee, Big Mac, rent (1br apartment), movie ticket, public transport fare, phone plan, popular smartphone price, average restaurant check.\n"
+        + "  - List 5+ popular store chains / restaurants / fast food.\n"
+        + "  - One-line summary of economic mood.\n"
+        + "  - Format: '- [item]: [price]' per line."
+    );
+
+    if (modules.daily_life) modInstr.push(
+        "EVERYDAY LIFE:\n"
+        + "  - Transport: how do people commute? Taxi apps? Public transport?\n"
+        + "  - Food: delivery services? Popular cuisines/restaurants? Cooking at home?\n"
+        + "  - Dating: which apps/sites? How do people meet?\n"
+        + "  - Entertainment: what do people do on weekends? Clubs? Malls? Parks?\n"
+        + "  - Housing: typical apartment description (2-3 lines).\n"
+        + "  - 10+ specific details. One line each."
+    );
+
+    if (modules.slang) modInstr.push(
+        "SLANG & SPEECH:\n"
+        + "  - List 20+ era-specific slang words/expressions with brief meaning in parentheses.\n"
+        + "  - Include: internet slang, youth slang, popular catchphrases, greetings.\n"
+        + "  - Note how different generations speak (teens vs 30s vs 50+).\n"
+        + "  - Format: '- [word/phrase] = [meaning]' per line."
+    );
+
+    if (modules.anachronisms) modInstr.push(
+        "ANACHRONISM BLACKLIST (CRITICAL SECTION):\n"
+        + "  - List 30+ specific items that DO NOT EXIST in " + year + ".\n"
+        + "  - Categories: apps, devices, social media, movies, TV shows, music, events, technologies, brands, slang terms.\n"
+        + "  - Be thorough: include things from 1, 2, 5, 10 years AFTER " + year + ".\n"
+        + "  - Format: '- [item] ([actual year of appearance])' per line.\n"
+        + "  - This list is used to PREVENT the AI from mentioning future things. Be exhaustive."
+    );
+
+    if (modules.news_background) modInstr.push(
+        "NEWS & HOT TOPICS:\n"
+        + "  - List 10+ specific events/topics people are discussing RIGHT NOW in " + year + ".\n"
+        + "  - Include: political scandals, natural disasters, celebrity gossip, sports events, viral stories.\n"
+        + "  - One line per topic. Date + what happened."
+    );
+
+    var modBlock = modInstr.map(function(m, i) { return (i + 1) + ". " + m; }).join("\n\n");
+
+    return "You are a historical encyclopedia bot. Given raw Wikipedia data about "
+        + countryWikiName + " around " + year + ", create an ultra-dense CONTEXT PACKAGE for roleplay.\n\n"
+        + "TARGET: " + countryDisplay + ", " + year + ".\n\n"
+        + "RAW DATA:\n" + rawDataBlock + "\n\n"
+        + "SECTIONS TO GENERATE:\n\n" + modBlock + "\n\n"
+        + "FORMATTING RULES:\n"
+        + "- MAXIMUM DENSITY. Every line must contain a concrete name, number, brand, title, or date.\n"
+        + "- ZERO filler. No 'it was a time of change', no 'people enjoyed various activities'. ONLY specifics.\n"
+        + "- Use bullet points (- ). One fact per line. No paragraphs.\n"
+        + "- Sub-categories within sections are separated by bold headers (**).\n"
+        + "- If a section asks for N items, provide AT LEAST N items. More is better.\n"
+        + "- If raw data is insufficient, use your own knowledge. Stay historically accurate.\n"
         + "- " + (langMap[outputLang] || langMap.en) + "\n"
-        + "- Format output starting with '## ChronoContext: " + countryDisplay + ", " + year + "' header.\n"
-        + "- Keep total length under 2000 words.";
+        + "- Start with header: '## ChronoContext: " + countryDisplay + ", " + year + "'\n"
+        + "- MAXIMUM 3000 words. Pack as much info as possible within this limit.\n"
+        + "- DO NOT explain what ChronoContext is. DO NOT add meta-commentary. Just the data.";
 }
 
 async function generatePackage() {
@@ -521,7 +521,7 @@ async function generatePackage() {
         var articleCount = Object.keys(collectedTexts).length;
 
         if (articleCount === 0) {
-            setStatus("Wikipedia не нашла данных. Генерируем на основе знаний AI...");
+            setStatus("Wikipedia пуста. Генерация на основе знаний AI...");
         } else {
             setStatus("Найдено " + articleCount + " статей. AI обрабатывает...");
         }
@@ -531,7 +531,7 @@ async function generatePackage() {
             collectedTexts, settings.modules, lang
         );
 
-        setStatus("AI обрабатывает данные...");
+        setStatus("AI генерирует пакет...");
         var aiResponse = await safeGenerateQuietPrompt(processingPrompt);
 
         if (!aiResponse || aiResponse.trim().length < 100) {
@@ -560,23 +560,19 @@ async function generatePackage() {
 
 
 // =============================================
-//  ИНЖЕКЦИЯ В КОНТЕКСТ
+//  ИНЖЕКЦИЯ
 // =============================================
 
 function applyPackageInjection() {
     var settings = extension_settings[EXT_NAME];
-
     if (!settings.enabled || !settings.active_package) {
         safeSetExtensionPrompt(EXT_NAME, "", settings.injection_position, settings.injection_depth);
         return;
     }
-
     var injectionText = "<chrono_context_package>\n"
-        + "[SYSTEM NOTE: The following historical context package is ACTIVE. "
-        + "All characters, events, and descriptions MUST conform to this time period. "
-        + "Any anachronism is a critical error.]\n\n"
+        + "[SYSTEM NOTE: Historical context package is ACTIVE. ALL characters, events, descriptions MUST conform to this time period. Mentioning ANYTHING from the anachronism blacklist is a CRITICAL ERROR. Characters cannot know about future events.]\n\n"
         + settings.active_package + "\n\n"
-        + "[END OF HISTORICAL CONTEXT. Proceed with roleplay within these constraints.]\n"
+        + "[END OF HISTORICAL CONTEXT.]\n"
         + "</chrono_context_package>";
 
     safeSetExtensionPrompt(EXT_NAME, injectionText, settings.injection_position, settings.injection_depth);
@@ -605,11 +601,8 @@ function showPreview() {
 
 function togglePreview() {
     var $area = $("#chrono_preview_area");
-    if ($area.is(":visible")) {
-        $area.hide();
-    } else {
-        showPreview();
-    }
+    if ($area.is(":visible")) { $area.hide(); }
+    else { showPreview(); }
 }
 
 
@@ -686,13 +679,8 @@ function bindUIEvents() {
         }
     }
 
-    $("#chrono_generate_btn").on("click", function () {
-        generatePackage();
-    });
-
-    $("#chrono_preview_btn").on("click", function () {
-        togglePreview();
-    });
+    $("#chrono_generate_btn").on("click", function () { generatePackage(); });
+    $("#chrono_preview_btn").on("click", function () { togglePreview(); });
 
     $("#chrono_clear_btn").on("click", function () {
         settings.cache = {};
@@ -707,7 +695,6 @@ function bindUIEvents() {
     $("#chrono_edit_btn").on("click", function () {
         var $textarea = $("#chrono_preview_text");
         var isReadonly = $textarea.prop("readonly");
-
         if (isReadonly) {
             $textarea.prop("readonly", false).css("opacity", "1");
             $(this).text("Отменить");
@@ -727,7 +714,7 @@ function bindUIEvents() {
             var ck = getCacheKey(getCountryWikiName(), settings.year, settings.output_language);
             settings.cache[ck] = { package: editedText, timestamp: Date.now() };
             applyPackageInjection();
-            setStatus("Ручные правки сохранены и применены");
+            setStatus("Ручные правки сохранены");
             saveSettingsDebounced();
         }
         $("#chrono_preview_text").prop("readonly", true).css("opacity", "0.9");
@@ -738,7 +725,6 @@ function bindUIEvents() {
 
 function loadSettingsToUI() {
     var settings = extension_settings[EXT_NAME];
-
     $("#chrono_enabled").prop("checked", settings.enabled);
     $("#chrono_country").val(settings.country_key);
     $("#chrono_custom_country").val(settings.custom_country);
@@ -746,7 +732,6 @@ function loadSettingsToUI() {
     $("#chrono_year_slider").val(Math.max(1800, Math.min(2025, settings.year)));
     $("#chrono_year_input").val(settings.year);
     $("#chrono_language").val(settings.output_language);
-
     $("#chrono_mod_technology").prop("checked", settings.modules.technology);
     $("#chrono_mod_culture").prop("checked", settings.modules.culture);
     $("#chrono_mod_politics").prop("checked", settings.modules.politics);
@@ -755,7 +740,6 @@ function loadSettingsToUI() {
     $("#chrono_mod_slang").prop("checked", settings.modules.slang);
     $("#chrono_mod_anachronisms").prop("checked", settings.modules.anachronisms);
     $("#chrono_mod_news").prop("checked", settings.modules.news_background);
-
     if (settings.active_package) {
         showPreview();
         if (settings.enabled) {
@@ -771,89 +755,47 @@ function loadSettingsToUI() {
 // =============================================
 
 jQuery(async function () {
-    console.log("[ChronoContext] Начинаю инициализацию...");
-
+    console.log("[ChronoContext] Init...");
     try {
-        // Ищем контейнер для UI
         var container = null;
-        var selectors = [
-            "#extensions_settings",
-            "#extensions_settings2",
-            "#translation_container",
-        ];
-
+        var selectors = ["#extensions_settings", "#extensions_settings2", "#translation_container"];
         for (var i = 0; i < selectors.length; i++) {
             var $el = $(selectors[i]);
-            if ($el.length > 0) {
-                container = $el;
-                console.log("[ChronoContext] Контейнер найден: " + selectors[i]);
-                break;
-            }
+            if ($el.length > 0) { container = $el; console.log("[ChronoContext] Container: " + selectors[i]); break; }
         }
+        if (!container) { console.error("[ChronoContext] No container found!"); return; }
 
-        if (!container) {
-            console.error("[ChronoContext] Не найден контейнер для UI! Проверьте версию ST.");
-            return;
-        }
-
-        // Вставляем HTML
         container.append(buildSettingsHTML());
-        console.log("[ChronoContext] HTML вставлен в DOM");
+        console.log("[ChronoContext] HTML inserted");
 
-        // Инициализируем настройки
-        if (!extension_settings[EXT_NAME]) {
-            extension_settings[EXT_NAME] = {};
-        }
-
+        if (!extension_settings[EXT_NAME]) extension_settings[EXT_NAME] = {};
         var s = extension_settings[EXT_NAME];
-
-        // Мерж с дефолтами (первый уровень)
         for (var key in DEFAULT_SETTINGS) {
             if (DEFAULT_SETTINGS.hasOwnProperty(key) && s[key] === undefined) {
                 var val = DEFAULT_SETTINGS[key];
-                if (typeof val === "object" && val !== null && !Array.isArray(val)) {
-                    s[key] = JSON.parse(JSON.stringify(val));
-                } else {
-                    s[key] = val;
-                }
+                s[key] = (typeof val === "object" && val !== null && !Array.isArray(val))
+                    ? JSON.parse(JSON.stringify(val)) : val;
             }
         }
-
-        // Мерж модулей
         if (s.modules) {
             for (var mk in DEFAULT_SETTINGS.modules) {
-                if (DEFAULT_SETTINGS.modules.hasOwnProperty(mk) && s.modules[mk] === undefined) {
+                if (DEFAULT_SETTINGS.modules.hasOwnProperty(mk) && s.modules[mk] === undefined)
                     s.modules[mk] = DEFAULT_SETTINGS.modules[mk];
-                }
             }
         }
 
-        console.log("[ChronoContext] Настройки инициализированы:", JSON.stringify(s).substring(0, 200));
-
-        // Загружаем UI
         loadSettingsToUI();
-        console.log("[ChronoContext] UI загружен");
-
-        // Привязываем обработчики
         bindUIEvents();
-        console.log("[ChronoContext] Обработчики привязаны");
 
-        // Подписка на смену чата
         if (eventSource && event_types && event_types.CHAT_CHANGED) {
             eventSource.on(event_types.CHAT_CHANGED, function () {
                 var st = extension_settings[EXT_NAME];
-                if (st && st.enabled && st.active_package) {
-                    applyPackageInjection();
-                }
+                if (st && st.enabled && st.active_package) applyPackageInjection();
             });
-            console.log("[ChronoContext] Подписка на CHAT_CHANGED установлена");
-        } else {
-            console.warn("[ChronoContext] eventSource или event_types недоступны, подписка на CHAT_CHANGED пропущена");
         }
 
-        console.log("[ChronoContext] Расширение полностью загружено!");
-
+        console.log("[ChronoContext] Loaded!");
     } catch (err) {
-        console.error("[ChronoContext] КРИТИЧЕСКАЯ ОШИБКА при инициализации:", err);
+        console.error("[ChronoContext] CRITICAL:", err);
     }
 });
