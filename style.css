@@ -1,0 +1,291 @@
+/* ═══════════════════════════════════════
+ *  ChronoContext — Стили расширения
+ *  Цветовая схема адаптирована под
+ *  стандартную тему SillyTavern
+ * ═══════════════════════════════════════ */
+
+/* ─── Контейнер ─── */
+
+#chrono-context-settings {
+    font-size: 0.95em;
+}
+
+#chrono-context-settings .inline-drawer-content {
+    padding: 8px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* ─── Строки ─── */
+
+.chrono-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.chrono-row > label:not(.checkbox_label) {
+    font-size: 0.88em;
+    color: var(--SmartThemeQuoteColor, #b0b0b0);
+    margin-bottom: 2px;
+}
+
+/* ─── Управление годом: слайдер + числовое поле ─── */
+
+.chrono-year-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chrono-year-control input[type="range"] {
+    flex: 1;
+    cursor: pointer;
+    accent-color: var(--SmartThemeFavColor, #8a6bbf);
+}
+
+.chrono-year-control input[type="number"] {
+    width: 80px;
+    flex-shrink: 0;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.05em;
+}
+
+/* ─── Сетка модулей (2 колонки) ─── */
+
+.chrono-modules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+    padding: 4px 0;
+}
+
+.chrono-modules-grid .checkbox_label {
+    font-size: 0.88em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    padding: 3px 0;
+    transition: opacity 0.15s ease;
+}
+
+.chrono-modules-grid .checkbox_label:hover {
+    opacity: 0.8;
+}
+
+.chrono-modules-grid .checkbox_label span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ─── Кнопки действий ─── */
+
+.chrono-buttons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.chrono-buttons .menu_button {
+    flex: 1 1 auto;
+    min-width: 120px;
+    padding: 7px 12px;
+    font-size: 0.88em;
+    text-align: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.chrono-buttons .menu_button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Кнопка генерации — акцентный цвет */
+#chrono_generate_btn {
+    background: var(--SmartThemeFavColor, #8a6bbf);
+    color: #fff;
+    border: none;
+    font-weight: 600;
+}
+
+#chrono_generate_btn:hover:not(:disabled) {
+    filter: brightness(1.15);
+}
+
+#chrono_generate_btn:active:not(:disabled) {
+    filter: brightness(0.9);
+    transform: scale(0.98);
+}
+
+/* Кнопка очистки — красноватый тон */
+#chrono_clear_btn {
+    border-color: #c0392b;
+    color: #e74c3c;
+}
+
+#chrono_clear_btn:hover {
+    background: rgba(231, 76, 60, 0.12);
+}
+
+/* ─── Статус ─── */
+
+.chrono-status {
+    font-size: 0.84em;
+    color: var(--SmartThemeQuoteColor, #a0a0a0);
+    padding: 6px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 3px solid var(--SmartThemeFavColor, #8a6bbf);
+    transition: color 0.3s ease;
+    min-height: 1.4em;
+    word-break: break-word;
+}
+
+/* ─── Превью пакета ─── */
+
+#chrono_preview_area {
+    animation: chrono-fadein 0.25s ease;
+}
+
+#chrono_preview_text {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.82em;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 180px;
+    max-height: 500px;
+    border-radius: 6px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--SmartThemeBodyColor, #ccc);
+    transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+
+#chrono_preview_text:not([readonly]) {
+    border-color: var(--SmartThemeFavColor, #8a6bbf);
+    background: rgba(0, 0, 0, 0.25);
+}
+
+#chrono_preview_area .chrono-row {
+    flex-direction: row;
+    gap: 6px;
+}
+
+#chrono_edit_btn,
+#chrono_save_edit_btn {
+    font-size: 0.84em;
+    padding: 5px 10px;
+}
+
+#chrono_save_edit_btn {
+    background: var(--SmartThemeFavColor, #8a6bbf);
+    color: #fff;
+    border: none;
+    font-weight: 600;
+}
+
+/* ─── Горизонтальные разделители ─── */
+
+#chrono-context-settings .sysHR {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    margin: 4px 0;
+}
+
+/* ─── Заголовок drawer ─── */
+
+#chrono-context-settings .inline-drawer-toggle b {
+    font-size: 1em;
+    letter-spacing: 0.02em;
+}
+
+/* ─── Анимации ─── */
+
+@keyframes chrono-fadein {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ─── Пульсация статуса при загрузке ─── */
+
+.chrono-status-loading {
+    animation: chrono-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes chrono-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ─── Адаптивность ─── */
+
+@media (max-width: 600px) {
+    .chrono-modules-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chrono-buttons {
+        flex-direction: column;
+    }
+
+    .chrono-buttons .menu_button {
+        min-width: 100%;
+    }
+
+    .chrono-year-control {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .chrono-year-control input[type="number"] {
+        width: 100%;
+    }
+}
+
+/* ─── Скроллбар превью (тонкий, в стиле ST) ─── */
+
+#chrono_preview_text::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chrono_preview_text::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#chrono_preview_text::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+}
+
+#chrono_preview_text::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+/* ─── Select стилизация (для dropdown страны/языка) ─── */
+
+#chrono-context-settings select.text_pole {
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* ─── Чекбокс включения: выделяем его чуть больше ─── */
+
+#chrono-context-settings .chrono-row:first-child .checkbox_label {
+    font-size: 0.95em;
+    font-weight: 500;
+}
